@@ -15,7 +15,9 @@ BITS_IN_BYTES = 8
 class LengthExtAttack:
     def __init__(self, args):
         log_level = logging.DEBUG if args.verbose else logging.INFO
-        logging.basicConfig(level=log_level, format=("[%(levelname)s Message] %(message)s"))
+        logging.basicConfig(
+            level=log_level, format=("[%(levelname)s Message] %(message)s")
+        )
         self.logger = logging.getLogger(__file__)
         self.mal_add = None
 
@@ -29,7 +31,12 @@ class LengthExtAttack:
 
         # To understand why the padding is constructed this way, please see the "Padding" section of this
         # writeup: https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
-        return b"\x80" + (55 - length_in_bytes) * b"\0" + length_field + (num_nulls * b"\0")
+        return (
+            b"\x80"
+            + (55 - length_in_bytes) * b"\0"
+            + length_field
+            + (num_nulls * b"\0")
+        )
 
     def craft_malicious_md5(self, orig_msg, hash_orig_md5):
         attack_md5 = MD5("", logger=self.logger)
@@ -44,7 +51,11 @@ class LengthExtAttack:
             "\n###########################\n"
             "\nMD5_Length_Extension(malicious_addition) => {}"
             "\nMalicious Message => {}"
-            "\n{}".format(hash_attack_md5, orig_msg + self.get_padding(0) + self.mal_add, LOG_DIVIDER)
+            "\n{}".format(
+                hash_attack_md5,
+                orig_msg + self.get_padding(0) + self.mal_add,
+                LOG_DIVIDER,
+            )
         )
         return hash_attack_md5
 
@@ -52,7 +63,9 @@ class LengthExtAttack:
         if len(malicious_addition) > MD5.block_size - 1:
             self.logger.error(
                 "Abort the program as it does Not work with a "
-                "--malicious_addition that is longer than {} bytes".format(MD5.block_size - 1)
+                "--malicious_addition that is longer than {} bytes".format(
+                    MD5.block_size - 1
+                )
             )
             return
         self.mal_add = malicious_addition
@@ -65,7 +78,9 @@ class LengthExtAttack:
             "\nsecret_prefix => {}"
             "\norig_msg => {}"
             "\nmalicious_addition => {}"
-            "\npadding => {}\n{}".format(secret_prefix, orig_msg, self.mal_add, padding, LOG_DIVIDER)
+            "\npadding => {}\n{}".format(
+                secret_prefix, orig_msg, self.mal_add, padding, LOG_DIVIDER
+            )
         )
 
         # Original Message normal MD5 computation
@@ -94,7 +109,11 @@ class LengthExtAttack:
                 "MD5_Length_Extension(malicious_addition)"
             )
         else:
-            raise RuntimeError("Failure: {} != {}".format(normal_malicious_md5, length_extension_attack_md5))
+            raise RuntimeError(
+                "Failure: {} != {}".format(
+                    normal_malicious_md5, length_extension_attack_md5
+                )
+            )
 
 
 def parse_args():
@@ -123,7 +142,10 @@ def parse_args():
         'then generate a valid MD5 hash for without knowing the server secret (default => "%(default)s").',
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Increases the logging level of the program from INFO to DEBUG."
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Increases the logging level of the program from INFO to DEBUG.",
     )
     return parser.parse_args()
 
